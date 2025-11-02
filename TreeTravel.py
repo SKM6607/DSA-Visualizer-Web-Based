@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 from collections import deque
 
-app = Flask(__name__)
+# Create Blueprint
+traversal_bp = Blueprint('traversal', __name__, url_prefix='/traversal')
 
 # ----------------------------
 # Binary Search Tree Structure
@@ -201,9 +202,12 @@ HTML_PAGE = """
     input, button { padding: 6px; margin: 4px; }
     #tree { width: 100%; height: 600px; border: 1px solid #ddd; margin-top:10px; }
     #explanation { background: #f9f9f9; border: 1px solid #ccc; padding: 10px; margin-top: 10px; height: 180px; overflow-y: scroll; }
+    .back-btn { background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+    .back-btn:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
+  <a href="/" class="back-btn">← Back to Home</a>
   <h2>Binary Search Tree Visualizer (Insert, Delete, Traversals)</h2>
   <div>
     <input id="keyInput" type="number" placeholder="Enter key" />
@@ -221,13 +225,13 @@ HTML_PAGE = """
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
     async function fetchTree() {
-      const resp = await fetch('/tree');
+      const resp = await fetch('/traversal/tree');
       return await resp.json();
     }
 
     async function insertKey(){
       const val = document.getElementById('keyInput').value;
-      const resp = await fetch('/insert', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({key: parseInt(val)})});
+      const resp = await fetch('/traversal/insert', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({key: parseInt(val)})});
       const res = await resp.json();
       showExplanation(res.explanation);
       refreshTree();
@@ -235,14 +239,14 @@ HTML_PAGE = """
 
     async function deleteKey(){
       const val = document.getElementById('keyInput').value;
-      const resp = await fetch('/delete', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({key: parseInt(val)})});
+      const resp = await fetch('/traversal/delete', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({key: parseInt(val)})});
       const res = await resp.json();
       showExplanation(res.explanation);
       refreshTree();
     }
 
     async function traverse(type){
-      const resp = await fetch(`/traverse/${type}`);
+      const resp = await fetch(`/traversal/traverse/${type}`);
       const res = await resp.json();
       showExplanation(res.steps);
       alert(`${type.toUpperCase()} Traversal: ${res.result.join(', ')}`);
@@ -296,27 +300,27 @@ HTML_PAGE = """
 </html>
 """
 
-@app.route('/')
+@traversal_bp.route('/')
 def index():
     return render_template_string(HTML_PAGE)
 
-@app.route('/tree')
+@traversal_bp.route('/tree')
 def get_tree():
     return jsonify(bst.to_dict())
 
-@app.route('/insert', methods=['POST'])
+@traversal_bp.route('/insert', methods=['POST'])
 def insert():
     key = int(request.json['key'])
     ok, explanation = bst.insert(key)
     return jsonify({'success': ok, 'explanation': explanation})
 
-@app.route('/delete', methods=['POST'])
+@traversal_bp.route('/delete', methods=['POST'])
 def delete():
     key = int(request.json['key'])
     deleted, explanation = bst.delete(key)
     return jsonify({'success': deleted, 'explanation': explanation})
 
-@app.route('/traverse/<mode>')
+@traversal_bp.route('/traverse/<mode>')
 def traverse(mode):
     if mode == 'inorder':
         res, steps = bst.inorder()
@@ -331,7 +335,3 @@ def traverse(mode):
     else:
         return jsonify({'error': 'Invalid mode'})
     return jsonify({'result': res, 'steps': steps})
-def get_page():
-    return HTML_PAGE
-if __name__ == '__main__':
-    app.run(debug=True)

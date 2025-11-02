@@ -1,23 +1,10 @@
-"""
-Spanning Tree Visualizer + MST explanation
-Single-file Flask app. Generates a random weighted graph and produces:
- - Minimum Spanning Tree (Kruskal) (highlighted in RED)
- - Prim spanning trees (starting from different start nodes)
- - Randomized Kruskal (shuffle tie-breaking)
- - Random DFS spanning tree
-
-Run:
-  pip install flask networkx
-  python spanning_visualizer.py
-Open:
-  http://127.0.0.1:5000/
-"""
 import json
 import random
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 import networkx as nx
 
-app = Flask(__name__)
+# Create Blueprint
+spanning_bp = Blueprint('spanning', __name__, url_prefix='/spanning')
 
 # -------------------------
 # Graph & spanning tree utilities
@@ -225,9 +212,12 @@ HTML = """
     input, button, select { padding:6px; margin-right:6px; }
     #graph { width:100%; height:520px; border:1px solid #ccc; }
     #explain { background:#f9f9f9; border:1px solid #ddd; padding:8px; height:180px; overflow-y:auto; margin-top:8px;}
+    .back-btn { background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+    .back-btn:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
+  <a href="/" class="back-btn">← Back to Home</a>
   <h2>Spanning Tree Generator & MST (Kruskal)</h2>
   <div id="controls">
     Nodes: <input id="n_nodes" type="number" value="8" style="width:60px">
@@ -253,7 +243,7 @@ HTML = """
     async function regen(){
       const n = parseInt(document.getElementById('n_nodes').value);
       const p = parseFloat(document.getElementById('p_edge').value);
-      const resp = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({n:n, p:p})});
+      const resp = await fetch('/spanning/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({n:n, p:p})});
       const res = await resp.json();
       showExplanation(["Graph regenerated — use the buttons to compute trees."]);
       drawGraph(res.graph);
@@ -273,7 +263,7 @@ HTML = """
     }
 
     async function computeKruskal(){
-      const resp = await fetch('/kruskal');
+      const resp = await fetch('/spanning/kruskal');
       const res = await resp.json();
       showExplanation(res.steps);
       drawGraph(res.graph, res.tree_edges);
@@ -281,21 +271,21 @@ HTML = """
 
     async function computePrim(){
       const start = document.getElementById('primStart').value;
-      const resp = await fetch('/prim', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({start: parseInt(start)})});
+      const resp = await fetch('/spanning/prim', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({start: parseInt(start)})});
       const res = await resp.json();
       showExplanation(res.steps);
       drawGraph(res.graph, res.tree_edges);
     }
 
     async function randKruskal(){
-      const resp = await fetch('/randkruskal');
+      const resp = await fetch('/spanning/randkruskal');
       const res = await resp.json();
       showExplanation(res.steps);
       drawGraph(res.graph, res.tree_edges);
     }
 
     async function dfsTree(){
-      const resp = await fetch('/dfstree');
+      const resp = await fetch('/spanning/dfstree');
       const res = await resp.json();
       showExplanation(res.steps);
       drawGraph(res.graph, res.tree_edges);
@@ -348,7 +338,7 @@ HTML = """
 
     // initial load
     (async ()=> {
-      const res = await fetch('/init');
+      const res = await fetch('/spanning/init');
       const j = await res.json();
       drawGraph(j.graph);
       populatePrimStarts(j.nodes);
@@ -361,14 +351,14 @@ HTML = """
 # -------------------------
 # Flask endpoints
 # -------------------------
-@app.route('/init')
+@spanning_bp.route('/init')
 def init_graph():
     g = GM.G
     data = GM.graph_to_serializable()
     nodes = [n for n in g.nodes()]
     return jsonify({'graph': data, 'nodes': nodes})
 
-@app.route('/generate', methods=['POST'])
+@spanning_bp.route('/generate', methods=['POST'])
 def generate():
     body = request.json or {}
     n = int(body.get('n', GM.n_nodes))
@@ -378,7 +368,7 @@ def generate():
     nodes = [n for n in GM.G.nodes()]
     return jsonify({'graph': data, 'nodes': nodes})
 
-@app.route('/kruskal')
+@spanning_bp.route('/kruskal')
 def kruskal_endpoint():
     tree, steps = GM.kruskal_mst_with_steps()
     # collect tree edges
@@ -386,7 +376,7 @@ def kruskal_endpoint():
     graph = GM.graph_to_serializable(highlight_edges=tree_edges)
     return jsonify({'graph': graph, 'tree_edges': tree_edges, 'steps': steps})
 
-@app.route('/prim', methods=['POST'])
+@spanning_bp.route('/prim', methods=['POST'])
 def prim_endpoint():
     body = request.json or {}
     start = body.get('start', None)
@@ -395,20 +385,20 @@ def prim_endpoint():
     graph = GM.graph_to_serializable(highlight_edges=tree_edges)
     return jsonify({'graph': graph, 'tree_edges': tree_edges, 'steps': steps})
 
-@app.route('/randkruskal')
+@spanning_bp.route('/randkruskal')
 def randkruskal_endpoint():
     tree, steps = GM.randomized_kruskal()
     tree_edges = [(u,v) for u,v in tree.edges()]
     graph = GM.graph_to_serializable(highlight_edges=tree_edges)
     return jsonify({'graph': graph, 'tree_edges': tree_edges, 'steps': steps})
 
-@app.route('/dfstree')
+@spanning_bp.route('/dfstree')
 def dfstree_endpoint():
     tree, steps = GM.random_dfs_tree()
     tree_edges = [(u,v) for u,v in tree.edges()]
     graph = GM.graph_to_serializable(highlight_edges=tree_edges)
     return jsonify({'graph': graph, 'tree_edges': tree_edges, 'steps': steps})
-def get_page():
-    return HTML
-if __name__ == '__main__':
-    app.run(debug=True)
+
+@spanning_bp.route('/')
+def index():
+    return render_template_string(HTML)

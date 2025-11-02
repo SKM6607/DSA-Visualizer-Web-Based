@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 
-app = Flask(__name__)
+# Create Blueprint
+rotation_bp = Blueprint('rotation', __name__, url_prefix='/rotation')
 
 # ----------------------------
 # Binary Search Tree Node
@@ -228,16 +229,19 @@ HTML = """
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Color-Coded BST Visualizer</title>
+  <title>Tree Rotation Visualizer</title>
   <style>
     body { font-family: Arial; margin: 10px; }
     input, button { padding: 6px; margin: 3px; }
     #tree { width: 100%; height: 600px; border: 1px solid #ddd; margin-top:10px; }
     #explanation { background:#f9f9f9; border:1px solid #ccc; padding:10px; margin-top:10px; height:180px; overflow-y:scroll; }
+    .back-btn { background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+    .back-btn:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
-  <h2>Color-Coded BST Visualizer (Insert, Delete, Rotations)</h2>
+  <a href="/" class="back-btn">← Back to Home</a>
+  <h2>Tree Rotation Visualizer (Insert, Delete, Rotations)</h2>
   <input id="keyInput" type="number" placeholder="Enter key" />
   <button onclick="insertNode()">Insert</button>
   <button onclick="deleteNode()">Delete</button>
@@ -250,11 +254,11 @@ HTML = """
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    async function fetchTree(){ const res=await fetch('/tree'); return await res.json(); }
+    async function fetchTree(){ const res=await fetch('/rotation/tree'); return await res.json(); }
 
-    async function insertNode(){ const k=document.getElementById('keyInput').value; const r=await fetch('/insert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})}); const d=await r.json(); showExp(d.explanation); draw(); }
-    async function deleteNode(){ const k=document.getElementById('keyInput').value; const r=await fetch('/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})}); const d=await r.json(); showExp(d.explanation); draw(); }
-    async function rotate(t){ const k=document.getElementById('keyInput').value; const r=await fetch('/rotate/'+t,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})}); const d=await r.json(); showExp(d.explanation); draw(); }
+    async function insertNode(){ const k=document.getElementById('keyInput').value; const r=await fetch('/rotation/insert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})}); const d=await r.json(); showExp(d.explanation); draw(); }
+    async function deleteNode(){ const k=document.getElementById('keyInput').value; const r=await fetch('/rotation/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})}); const d=await r.json(); showExp(d.explanation); draw(); }
+    async function rotate(t){ const k=document.getElementById('keyInput').value; const r=await fetch('/rotation/rotate/'+t,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})}); const d=await r.json(); showExp(d.explanation); draw(); }
 
     function showExp(lines){ document.getElementById('explanation').innerHTML = lines.map(l=>`<div>➡️ ${l}</div>`).join(''); }
 
@@ -282,27 +286,27 @@ for v in [40, 20, 60, 10, 30, 50, 70]:
     bst.insert(v)
 
 
-@app.route('/')
+@rotation_bp.route('/')
 def index():
     return render_template_string(HTML)
 
-@app.route('/tree')
+@rotation_bp.route('/tree')
 def tree():
     return jsonify(bst.to_dict())
 
-@app.route('/insert', methods=['POST'])
+@rotation_bp.route('/insert', methods=['POST'])
 def insert():
     key = int(request.json['key'])
     _, exp = bst.insert(key)
     return jsonify({'explanation': exp})
 
-@app.route('/delete', methods=['POST'])
+@rotation_bp.route('/delete', methods=['POST'])
 def delete():
     key = int(request.json['key'])
     _, exp = bst.delete(key)
     return jsonify({'explanation': exp})
 
-@app.route('/rotate/<mode>', methods=['POST'])
+@rotation_bp.route('/rotate/<mode>', methods=['POST'])
 def rotate(mode):
     key = int(request.json['key'])
     if mode == 'left':
@@ -314,7 +318,3 @@ def rotate(mode):
     else:
         exp = bst.right_left_rotate(key)
     return jsonify({'explanation': exp})
-def get_page():
-    return HTML
-if __name__ == '__main__':
-    app.run(debug=True)

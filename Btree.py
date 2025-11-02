@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 import math
 
-app = Flask(__name__)
+# Create Blueprint
+btree_bp = Blueprint('btree', __name__, url_prefix='/btree')
 
 # ---------------------------------
 # B-Tree Node Class
@@ -139,9 +140,12 @@ HTML = """
     input, button { padding: 6px; margin: 3px; }
     #tree { width: 100%; height: 600px; border: 1px solid #ccc; margin-top:10px; }
     #steps { background:#f9f9f9; border:1px solid #ccc; padding:10px; margin-top:10px; height:180px; overflow-y:scroll; }
+    .back-btn { background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+    .back-btn:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
+  <a href="/" class="back-btn">← Back to Home</a>
   <h2>B-Tree Visualizer (Insertion, Search, Auto-Splitting)</h2>
   <input id="key" type="number" placeholder="Enter key">
   <button onclick="insertKey()">Insert</button>
@@ -151,17 +155,17 @@ HTML = """
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    async function getTree(){ const r=await fetch('/tree'); return await r.json(); }
+    async function getTree(){ const r=await fetch('/btree/tree'); return await r.json(); }
 
     async function insertKey(){
       const key=document.getElementById('key').value;
-      const r=await fetch('/insert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
+      const r=await fetch('/btree/insert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
       const d=await r.json(); showSteps(d.steps); draw();
     }
 
     async function searchKey(){
       const key=document.getElementById('key').value;
-      const r=await fetch('/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
+      const r=await fetch('/btree/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
       const d=await r.json(); showSteps(d.steps); draw();
     }
 
@@ -196,26 +200,22 @@ btree = BTree(t=2)
 for val in [10, 20, 5, 6, 12, 30, 7, 17]:
     btree.insert(val)
 
-@app.route('/')
+@btree_bp.route('/')
 def index():
     return render_template_string(HTML)
 
-@app.route('/tree')
+@btree_bp.route('/tree')
 def tree():
     return jsonify(btree.to_dict())
 
-@app.route('/insert', methods=['POST'])
+@btree_bp.route('/insert', methods=['POST'])
 def insert():
     key = int(request.json['key'])
     steps = btree.insert(key)
     return jsonify({"steps": steps})
 
-@app.route('/search', methods=['POST'])
+@btree_bp.route('/search', methods=['POST'])
 def search():
     key = int(request.json['key'])
     steps = btree.search(key)
     return jsonify({"steps": steps})
-def get_page():
-    return HTML
-if __name__ == '__main__':
-    app.run(debug=True)

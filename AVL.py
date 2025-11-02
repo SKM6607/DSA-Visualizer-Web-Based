@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 
-app = Flask(__name__)
+# Create Blueprint
+avl_bp = Blueprint('avl', __name__, url_prefix='/avl')
 
 # ----------------------------
 # AVL TREE NODE
@@ -203,9 +204,12 @@ HTML = """
     input, button { padding: 6px; margin: 3px; }
     #tree { width: 100%; height: 600px; border: 1px solid #ccc; margin-top:10px; }
     #steps { background:#f9f9f9; border:1px solid #ccc; padding:10px; margin-top:10px; height:180px; overflow-y:scroll; }
+    .back-btn { background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+    .back-btn:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
+  <a href="/" class="back-btn">← Back to Home</a>
   <h2>AVL Tree Visualizer (Insert, Delete, Auto-Balancing Rotations)</h2>
   <input id="key" type="number" placeholder="Enter key">
   <button onclick="insertNode()">Insert</button>
@@ -215,17 +219,17 @@ HTML = """
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    async function getTree(){ const r=await fetch('/tree'); return await r.json(); }
+    async function getTree(){ const r=await fetch('/avl/tree'); return await r.json(); }
 
     async function insertNode(){
       const key=document.getElementById('key').value;
-      const r=await fetch('/insert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
+      const r=await fetch('/avl/insert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
       const d=await r.json(); showSteps(d.steps); draw();
     }
 
     async function deleteNode(){
       const key=document.getElementById('key').value;
-      const r=await fetch('/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
+      const r=await fetch('/avl/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
       const d=await r.json(); showSteps(d.steps); draw();
     }
 
@@ -254,34 +258,29 @@ HTML = """
 </body>
 </html>
 """
-def get_page():
-    avlIn = AVLTree()
-    for value in [30, 10, 50, 5, 20, 40, 60]:
-        avlIn.insert(value)
 
-    return HTML
+# Create global AVL instance
 avl = AVLTree()
 for val in [30, 10, 50, 5, 20, 40, 60]:
     avl.insert(val)
-@app.route('/')
+
+# Blueprint routes
+@avl_bp.route('/')
 def index():
     return render_template_string(HTML)
 
-@app.route('/tree')
+@avl_bp.route('/tree')
 def tree():
     return jsonify(avl.to_dict())
 
-@app.route('/insert', methods=['POST'])
+@avl_bp.route('/insert', methods=['POST'])
 def insert():
     key = int(request.json['key'])
     steps = avl.insert(key)
     return jsonify({"steps": steps})
 
-@app.route('/delete', methods=['POST'])
+@avl_bp.route('/delete', methods=['POST'])
 def delete():
     key = int(request.json['key'])
     steps = avl.delete(key)
     return jsonify({"steps": steps})
-
-if __name__ == '__main__':
-    app.run(debug=True)

@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 
-app = Flask(__name__)
+# Create Blueprint
+bst_bp = Blueprint('bst', __name__, url_prefix='/bst')
 
 # ----------------------------
 # Binary Search Tree Structure
@@ -141,9 +142,12 @@ INDEX_HTML = """
     .node circle { fill: #fff; stroke: steelblue; stroke-width: 2px; }
     .node text { font: 12px sans-serif; }
     .link { fill: none; stroke: #ccc; stroke-width: 2px; }
+    .back-btn { background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+    .back-btn:hover { background: #4f46e5; }
   </style>
 </head>
 <body>
+  <a href="/" class="back-btn">← Back to Home</a>
   <h2>Binary Search Tree Visualizer (Insert & Delete Explanation)</h2>
   <div>
     <input id="keyInput" type="number" placeholder="Enter key value" />
@@ -159,14 +163,14 @@ INDEX_HTML = """
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
     async function fetchTree() {
-      const resp = await fetch('/tree');
+      const resp = await fetch('/bst/tree');
       return await resp.json();
     }
 
     async function insertKey(){
       const val = document.getElementById('keyInput').value;
       if(!val){ alert('Enter a key'); return; }
-      const resp = await fetch('/insert', {
+      const resp = await fetch('/bst/insert', {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({key: parseInt(val)})
       });
@@ -179,7 +183,7 @@ INDEX_HTML = """
     async function deleteKey(){
       const val = document.getElementById('keyInput').value;
       if(!val){ alert('Enter a key'); return; }
-      const resp = await fetch('/delete', {
+      const resp = await fetch('/bst/delete', {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({key: parseInt(val)})
       });
@@ -247,15 +251,15 @@ INDEX_HTML = """
 # ----------------------------
 # Flask Routes
 # ----------------------------
-@app.route('/')
+@bst_bp.route('/')
 def index():
     return render_template_string(INDEX_HTML)
 
-@app.route('/tree')
+@bst_bp.route('/tree')
 def get_tree():
     return jsonify(bst.to_dict())
 
-@app.route('/insert', methods=['POST'])
+@bst_bp.route('/insert', methods=['POST'])
 def insert():
     data = request.get_json()
     key = int(data['key'])
@@ -263,14 +267,10 @@ def insert():
     message = f"Inserted {key}" if ok else f"Key {key} already exists"
     return jsonify({'success': ok, 'message': message, 'explanation': explanation})
 
-@app.route('/delete', methods=['POST'])
+@bst_bp.route('/delete', methods=['POST'])
 def delete():
     data = request.get_json()
     key = int(data['key'])
     deleted, explanation = bst.delete(key)
     message = f"Deleted {key}" if deleted else f"Key {key} not found"
     return jsonify({'success': deleted, 'message': message, 'explanation': explanation})
-def get_page():
-    return INDEX_HTML
-if __name__ == '__main__':
-    app.run(debug=True)
