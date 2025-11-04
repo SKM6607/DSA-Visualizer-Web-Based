@@ -5,7 +5,9 @@ from Btree import btree_bp
 from Spanning import spanning_bp
 from TreeRotation import rotation_bp
 from TreeTravel import traversal_bp
-
+from U3stackarray import stack_array
+from U3balancingsymbol import balancing_symbol
+from U5dijkstra import dijkstra_
 app = Flask(__name__)
 
 # Register all blueprints
@@ -15,7 +17,9 @@ app.register_blueprint(btree_bp)
 app.register_blueprint(spanning_bp)
 app.register_blueprint(rotation_bp)
 app.register_blueprint(traversal_bp)
-
+app.register_blueprint(stack_array)
+app.register_blueprint(balancing_symbol)
+app.register_blueprint(dijkstra_)
 # Modern home page with cards
 HOME_PAGE = """
 <!DOCTYPE html>
@@ -103,11 +107,14 @@ HOME_PAGE = """
         }
 
         .card-avl { border-top: 4px solid #667eea; }
+        .card-stack_array { border-top: 4px solid #667eea; }
         .card-bst { border-top: 4px solid #f093fb; }
         .card-btree { border-top: 4px solid #4facfe; }
+        .card-balancing-symbol{ border-top: 4px solid #4facfe; }
         .card-spanning { border-top: 4px solid #43e97b; }
         .card-rotation { border-top: 4px solid #fa709a; }
         .card-traversal { border-top: 4px solid #feca57; }
+        .card-dijkstra { border-top: 4px solid #feca57; }
 
         @media (max-width: 768px) {
             .header h1 {
@@ -135,6 +142,18 @@ HOME_PAGE = """
                 <p>Self-balancing binary search tree with automatic rotations. Watch real-time balancing operations and explore LL, RR, LR, and RL rotation cases.</p>
             </a>
 
+            <a href="/stack_array" class="card card-stack_array">
+                <span class="card-icon">⚖️</span>
+                <h2>Stack Array Visualizer</h2>
+                <p>Self-balancing binary search tree with automatic rotations. Watch real-time balancing operations and explore LL, RR, LR, and RL rotation cases.</p>
+            </a>
+
+            <a href="/balancing_symbol" class="card card-balancing-symbol">
+                <span class="card-icon">⚖️</span>
+                <h2>Balancing Symbol</h2>
+                <p>Self-balancing binary search tree with automatic rotations. Watch real-time balancing operations and explore LL, RR, LR, and RL rotation cases.</p>
+            </a>
+
             <a href="/bst" class="card card-bst">
                 <span class="card-icon">🌲</span>
                 <h2>Binary Search Tree</h2>
@@ -159,6 +178,11 @@ HOME_PAGE = """
                 <p>Master tree rotations with interactive demonstrations. Practice left, right, left-right, and right-left rotations with visual feedback.</p>
             </a>
 
+            <a href="/dijkstra" class="card card-dijkstra">
+                <span class="card-icon">⚖️</span>
+                <h2>Balancing Symbol</h2>
+                <p>Self-balancing binary search tree with automatic rotations. Watch real-time balancing operations and explore LL, RR, LR, and RL rotation cases.</p>
+            </a>
             <a href="/traversal" class="card card-traversal">
                 <span class="card-icon">🔍</span>
                 <h2>Tree Traversal Methods</h2>
