@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template_string, request, jsonify
 
-dijkstra_ = Blueprint("/dijkstra", __name__)
+# ✅ Correct blueprint name (should not start with '/')
+dijkstra_ = Blueprint("dijkstra", __name__)
 
 # --- HTML and Visualization Template ---
 html_template = """
@@ -66,7 +67,7 @@ html_template = """
         async function runDijkstra() {
             const edges = document.getElementById("edgesInput").value.trim();
             const source = document.getElementById("sourceInput").value.trim();
-            const response = await fetch("/dijkstra", {
+            const response = await fetch("/dijkstra/run", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({edges: edges, source: source})
@@ -94,7 +95,7 @@ html_template = """
             // Draw initial graph
             clearCanvas();
             edges.forEach(e => drawEdge(e[0], e[1], e[2]));
-            nodes.forEach(n => drawNode(n));
+            nodes.forEach(n => drawNode(n, positions[n][0], positions[n][1]));
 
             for (let s of steps) {
                 await new Promise(r => setTimeout(r, 1000));
@@ -132,26 +133,36 @@ html_template = """
 def home():
     return render_template_string(html_template)
 
-@dijkstra_.route("/dijkstra", methods=["POST"])
-def dijkstra():
+@dijkstra_.route("/run", methods=["POST"])
+def run_dijkstra():
     data = request.get_json()
-    raw_edges = data["edges"]
-    source = data["source"].strip()
+    raw_edges = data.get("edges", "")
+    source = data.get("source", "").strip()
 
     edges = []
     nodes = set()
-    for part in raw_edges.split(","):
-        u, v, w = part.strip().split()
-        w = int(w)
-        edges.append((u, v, w))
-        edges.append((v, u, w))  # undirected
-        nodes.add(u)
-        nodes.add(v)
 
+    # Parse input edges
+    for part in raw_edges.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            u, v, w = part.split()
+            w = int(w)
+            edges.append((u, v, w))
+            edges.append((v, u, w))  # Undirected graph
+            nodes.add(u)
+            nodes.add(v)
+        except ValueError:
+            continue  # skip invalid entries
+
+    # Build adjacency list
     graph = {n: [] for n in nodes}
     for u, v, w in edges:
         graph[u].append((v, w))
 
+    # Dijkstra’s Algorithm
     dist = {n: float("inf") for n in nodes}
     dist[source] = 0
     visited = set()
@@ -168,8 +179,8 @@ def dijkstra():
                 steps.append({"u": u, "v": v, "weight": w, "newDist": dist[v]})
 
     return jsonify({
-        "nodes": list(nodes),
-        "edges": [(u, v, w) for u, v, w in edges if u < v],
+        "nodes": sorted(list(nodes)),
+        "edges": [(u, v, w) for u, v, w in edges if u < v],  # avoid duplicates
         "steps": steps,
         "distances": dist,
         "source": source
