@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template_string
 
-app = Blueprint('infixToPostfix',__name__,url_prefix='/infix_to_postfix')
+infix_to_postfix_bp = Blueprint('infixToPostfix', __name__, url_prefix='/infix_to_postfix')
 
 # ------------------------------
 # Infix to Postfix Conversion Logic
@@ -72,7 +72,7 @@ def infix_to_postfix(expression):
 # Flask Routes
 # ------------------------------
 
-@app.route('/')
+@infix_to_postfix_bp.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
@@ -97,7 +97,7 @@ def index():
             async function convert() {
                 let expr = document.getElementById("expression").value;
                 if (!expr) return alert("Enter an infix expression");
-                let res = await fetch('/convert?expr=' + expr);
+                let res = await fetch('/infix_to_postfix/convert?expr=' + expr);
                 let data = await res.json();
                 document.getElementById("status").innerText = "Postfix Expression: " + data.postfix;
                 animateSteps(data.steps);
@@ -145,7 +145,7 @@ def index():
     </html>
     """)
 
-@app.route('/convert')
+@infix_to_postfix_bp.route('/convert')
 def convert_expression():
     expr = request.args.get('expr', '')
     postfix, steps = infix_to_postfix(expr)
@@ -155,6 +155,3 @@ def convert_expression():
 # ------------------------------
 # Run Flask App
 # ------------------------------
-
-if __name__ == '__main__':
-    app.run(debug=True)

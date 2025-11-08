@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template_string
 
-app = Blueprint('postfixEvaluation',__name__,url_prefix='/postfix_evaluation')
+postfix_evaluation = Blueprint('postfixEvaluation', __name__, url_prefix='/postfix_evaluation')
 
 # ------------------------------
 # Postfix Evaluation Logic
@@ -59,7 +59,7 @@ def evaluate_postfix(expression):
 # Flask Routes
 # ------------------------------
 
-@app.route('/')
+@postfix_evaluation.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
@@ -76,15 +76,15 @@ def index():
     <body>
         <h2>🧮 Postfix Expression Evaluation Visualization</h2>
         <input type="text" id="expression" placeholder="Enter postfix (e.g., 231*+9-)" size="40">
-        <button onclick="evaluate()">Evaluate</button>
+        <button onclick="evaluatePostFix()">Evaluate</button>
         <p id="status"></p>
         <canvas id="canvas" width="1000" height="500"></canvas>
 
         <script>
-            async function evaluate() {
+            async function evaluatePostFix() {
                 let expr = document.getElementById("expression").value;
                 if (!expr) return alert("Enter a postfix expression");
-                let res = await fetch('/evaluate?expr=' + expr);
+                let res = await fetch('/postfix_evaluation/evaluate?expr=' + expr);
                 let data = await res.json();
                 document.getElementById("status").innerText = "Final Result: " + data.result;
                 animateSteps(data.steps);
@@ -125,16 +125,8 @@ def index():
     </html>
     """)
 
-@app.route('/evaluate')
+@postfix_evaluation.route('/evaluate')
 def evaluate_expression():
     expr = request.args.get('expr', '')
     result, steps = evaluate_postfix(expr)
     return jsonify({"result": result, "steps": steps})
-
-
-# ------------------------------
-# Run Flask App
-# ------------------------------
-
-if __name__ == '__main__':
-    app.run(debug=True)

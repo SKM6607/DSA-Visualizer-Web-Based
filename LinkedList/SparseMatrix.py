@@ -1,11 +1,8 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Blueprint, request, jsonify, render_template_string
 
-app = Flask(__name__)
+sparse_matrix_bp = Blueprint('sparseMatrix', __name__, url_prefix='/sparse_matrix')
 
-# ------------------------------
-# Sparse Matrix (Triplet Linked Representation)
-# ------------------------------
-
+#
 class Node:
     def __init__(self, row, col, val):
         self.row = row
@@ -75,13 +72,9 @@ class SparseMatrix:
             curr = curr.next
         return result
 
-
-# ------------------------------
-# Flask App Setup
-# ------------------------------
 matrix = SparseMatrix(rows=5, cols=5)
 
-@app.route('/')
+@sparse_matrix_bp.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
@@ -118,7 +111,7 @@ def index():
                     alert("Please enter row, column, and value!");
                     return;
                 }
-                let res = await fetch(`/insert?row=${row}&col=${col}&val=${val}`);
+                let res = await fetch(`/sparse_matrix/insert?row=${row}&col=${col}&val=${val}`);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawMatrix(data.elements);
@@ -131,7 +124,7 @@ def index():
                     alert("Please enter row and column!");
                     return;
                 }
-                let res = await fetch(`/delete?row=${row}&col=${col}`);
+                let res = await fetch(`/sparse_matrix/delete?row=${row}&col=${col}`);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawMatrix(data.elements);
@@ -206,7 +199,7 @@ def index():
 
             // Load initial matrix
             window.onload = async function() {
-                let res = await fetch('/status');
+                let res = await fetch('/sparse_matrix/status');
                 let data = await res.json();
                 drawMatrix(data.elements);
             };
@@ -216,7 +209,7 @@ def index():
     """)
 
 
-@app.route('/insert')
+@sparse_matrix_bp.route('/insert')
 def insert():
     row = request.args.get('row', type=int)
     col = request.args.get('col', type=int)
@@ -224,22 +217,13 @@ def insert():
     msg = matrix.insert(row, col, val)
     return jsonify({"message": msg, "elements": matrix.to_list()})
 
-
-@app.route('/delete')
+@sparse_matrix_bp.route('/delete')
 def delete():
     row = request.args.get('row', type=int)
     col = request.args.get('col', type=int)
     msg = matrix.delete(row, col)
     return jsonify({"message": msg, "elements": matrix.to_list()})
 
-
-@app.route('/status')
+@sparse_matrix_bp.route('/status')
 def status():
     return jsonify({"elements": matrix.to_list()})
-
-
-# ------------------------------
-# Run Server
-# ------------------------------
-if __name__ == '__main__':
-    app.run(debug=True)

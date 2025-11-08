@@ -72,14 +72,14 @@ def index():
             async function pushValue() {
                 let val = document.getElementById("stackValue").value;
                 if (!val) return alert("Enter a value to push.");
-                let res = await fetch('/push?value=' + val);
+                let res = await fetch('/stack_array/push?value=' + val);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawStack(data.stack);
             }
 
             async function popValue() {
-                let res = await fetch('/pop');
+                let res = await fetch('/stack_array/pop');
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawStack(data.stack);
@@ -131,7 +131,7 @@ def index():
 
 @stack_array.route('/push',methods=['GET','POST'])
 def push_value():
-    value = request.form.get('value')
+    value = request.args.get('value')
     if value:
         msg = stack.push(value)
     else:
@@ -146,6 +146,3 @@ def pop_value():
 # ------------------------------
 # Run Flask App
 # ------------------------------
-
-if __name__ == '__main__':
-    stack_array.run(debug=True)

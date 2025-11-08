@@ -1,6 +1,6 @@
-from flask import Blueprint, jsonify, render_template_string, request, Blueprint
+from flask import jsonify, render_template_string, request, Blueprint
 
-app = Blueprint('towerOfHanoi',__name__,url_prefix='tower_of_hanoi')
+tower_of_hanoi_bp = Blueprint('towerOfHanoi', __name__, url_prefix='/tower_of_hanoi')
 
 # ---- Tower of Hanoi Logic ----
 moves = []
@@ -26,7 +26,7 @@ def reset_towers(n):
     moves = []
 
 
-@app.route('/')
+@tower_of_hanoi_bp.route('/')
 def index():
     return render_template_string('''
 <!DOCTYPE html>
@@ -60,7 +60,7 @@ def index():
 
         async function startSimulation() {
             const n = document.getElementById('diskInput').value;
-            const response = await fetch('/start?n=' + n);
+            const response = await fetch('/tower_of_hanoi/start?n=' + n);
             const data = await response.json();
 
             towers = data.towers;
@@ -119,7 +119,7 @@ def index():
     ''')
 
 
-@app.route('/start')
+@tower_of_hanoi_bp.route('/start')
 def start():
     """Start the simulation based on user input"""
     n = int(request.args.get('n', 4))
@@ -131,8 +131,3 @@ def start():
         "disk_colors": disk_colors,
         "stem_colors": stem_colors
     })
-
-
-if __name__ == '__main__':
-    reset_towers(4)
-    app.run(debug=True)

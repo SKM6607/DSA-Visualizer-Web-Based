@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template_string
 
-app = Blueprint('stackLL',__name__,url_prefix='/stack_linked_list')
+stack_linked_list_bp = Blueprint('stackLL', __name__, url_prefix='/stack_linked_list')
 
 # ------------------------------
 # Stack Data Structure
@@ -52,7 +52,7 @@ stack = Stack()
 # Flask Routes
 # ------------------------------
 
-@app.route('/')
+@stack_linked_list_bp.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
@@ -81,14 +81,14 @@ def index():
             async function push() {
                 let val = document.getElementById("value").value;
                 if (!val) return alert("Enter a value to push");
-                let res = await fetch('/push?value=' + val);
+                let res = await fetch('/stack_linked_list/push?value=' + val);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawStack(data.stack);
             }
 
             async function pop() {
-                let res = await fetch('/pop');
+                let res = await fetch('/stack_linked_list/pop');
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawStack(data.stack);
@@ -144,7 +144,7 @@ def index():
 
             // Load current stack on page load
             window.onload = async function() {
-                let res = await fetch('/status');
+                let res = await fetch('/stack_linked_list/status');
                 let data = await res.json();
                 drawStack(data.stack);
             };
@@ -154,20 +154,20 @@ def index():
     """)
 
 
-@app.route('/push')
+@stack_linked_list_bp.route('/push')
 def push_value():
     value = request.args.get('value')
     msg = stack.push(value) if value else "No value provided."
     return jsonify({"message": msg, "stack": stack.to_list()})
 
 
-@app.route('/pop')
+@stack_linked_list_bp.route('/pop')
 def pop_value():
     msg = stack.pop()
     return jsonify({"message": msg, "stack": stack.to_list()})
 
 
-@app.route('/status')
+@stack_linked_list_bp.route('/status')
 def get_status():
     return jsonify({"stack": stack.to_list()})
 
@@ -176,4 +176,4 @@ def get_status():
 # Run the Server
 # ------------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    stack_linked_list_bp.run(debug=True)

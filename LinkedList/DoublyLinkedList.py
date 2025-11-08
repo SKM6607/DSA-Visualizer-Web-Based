@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import request, jsonify, render_template_string, Blueprint
 
-app = Flask(__name__)
+doubly_linked_list_bp = Blueprint('doublyLinkedList', __name__, url_prefix='/doubly_linkedlist')
 
 # ------------------------------
 # Data Structure: Doubly Linked List
@@ -69,7 +69,7 @@ dll = DoublyLinkedList()
 # Flask Routes
 # ------------------------------
 
-@app.route('/')
+@doubly_linked_list_bp.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
@@ -99,7 +99,7 @@ def index():
             async function insertNode() {
                 let val = document.getElementById("nodeValue").value;
                 if(!val) return alert("Enter a value");
-                let res = await fetch('/insert?value=' + val);
+                let res = await fetch('/doubly_linkedlist/insert?value=' + val);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawList(data.list);
@@ -108,7 +108,7 @@ def index():
             async function deleteNode() {
                 let val = document.getElementById("nodeValue").value;
                 if(!val) return alert("Enter a value to delete");
-                let res = await fetch('/delete?value=' + val);
+                let res = await fetch('/doubly_linkedlist/delete?value=' + val);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawList(data.list);
@@ -213,7 +213,7 @@ def index():
     """)
 
 
-@app.route('/insert')
+@doubly_linked_list_bp.route('/insert')
 def insert_node():
     value = request.args.get('value')
     if value:
@@ -223,7 +223,7 @@ def insert_node():
     return jsonify({"message": msg, "list": dll.to_list()})
 
 
-@app.route('/delete')
+@doubly_linked_list_bp.route('/delete')
 def delete_node():
     value = request.args.get('value')
     if value:
@@ -231,10 +231,3 @@ def delete_node():
     else:
         msg = "No value provided for deletion."
     return jsonify({"message": msg, "list": dll.to_list()})
-
-
-# ------------------------------
-# Run Server
-# ------------------------------
-if __name__ == '__main__':
-    app.run(debug=True)
