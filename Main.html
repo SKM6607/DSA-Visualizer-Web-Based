@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="Style.css">
 </head>
 <body>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+    <span class="theme-icon">🌙</span>
+</button>
+
 <div class="container">
     <div class="header">
         <h1>Data Structure Visualizer</h1>
@@ -42,7 +46,7 @@
                 <span class="card-icon">🅱️</span>
                 <h2>BTree</h2>
                 <p>A B-Tree is a self-balancing search tree that stores multiple keys in each node and keeps data sorted
-                    for fast access, insertion, and deletion. It’s optimized for systems that read and write large data
+                    for fast access, insertion, and deletion. It's optimized for systems that read and write large data
                     blocks, such as databases and file systems. All leaf nodes are at the same level, ensuring balance,
                     and the tree grows or shrinks using node splits and merges. This structure keeps the height low,
                     allowing efficient disk-based searching in O(log n) time.</p>
@@ -117,21 +121,21 @@
 
             <a href="/dijkstra" class="card card-dijkstra">
                 <span class="card-icon">🚦</span>
-                <h2>Dijkstra’s Shortest Path</h2>
-                <p>Visualize Dijkstra’s algorithm step-by-step with animations and highlights.</p>
+                <h2>Dijkstra's Shortest Path</h2>
+                <p>Visualize Dijkstra's algorithm step-by-step with animations and highlights.</p>
             </a>
 
             <a href="/prims" class="card card-prims">
                 <span class="card-icon">🕸️</span>
-                <h2>Prim’s Minimum Spanning Tree</h2>
-                <p>Visualize Prim’s algorithm as it grows the minimum spanning tree step-by-step from a starting
+                <h2>Prim's Minimum Spanning Tree</h2>
+                <p>Visualize Prim's algorithm as it grows the minimum spanning tree step-by-step from a starting
                     node.</p>
             </a>
 
             <a href="/kruskal" class="card card-kruskal">
                 <span class="card-icon">🌉</span>
-                <h2>Kruskal’s Minimum Spanning Tree</h2>
-                <p>Watch Kruskal’s algorithm build the minimum spanning tree by sorting edges and connecting components
+                <h2>Kruskal's Minimum Spanning Tree</h2>
+                <p>Watch Kruskal's algorithm build the minimum spanning tree by sorting edges and connecting components
                     visually.</p>
             </a>
 
@@ -212,5 +216,29 @@
         </div>
     </div>
 </div>
+
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('.theme-icon');
+const html = document.documentElement;
+
+// Check for saved theme preference or default to 'dark'
+const currentTheme = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', currentTheme);
+updateThemeIcon(currentTheme);
+
+themeToggle.addEventListener('click', () => {
+    const theme = html.getAttribute('data-theme');
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+});
+
+function updateThemeIcon(theme) {
+    themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+}
+</script>
 </body>
 </html>
