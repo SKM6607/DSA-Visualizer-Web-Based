@@ -1,7 +1,6 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request
 #DONE
-balancing_symbol = Flask(__name__)
-
+balancing_symbol_bp = Blueprint('balancingSymbol', __name__, url_prefix='/balancing_symbol')
 # -----------------------------
 # Symbol Balance Logic (Detailed)
 # -----------------------------
@@ -74,7 +73,7 @@ def is_balanced(expression):
 # -----------------------------
 # Routes
 # -----------------------------
-@balancing_symbol.route('/')
+@balancing_symbol_bp.route('/')
 def index():
     return render_template_string("""
 <!DOCTYPE html>
@@ -119,7 +118,7 @@ def index():
         async function checkBalance() {
             const expr = document.getElementById('expr').value.trim();
             if (!expr) return alert("Please enter an expression.");
-            const res = await fetch('/check?expr=' + encodeURIComponent(expr));
+            const res = await fetch('/balancing_symbol/check?expr=' + encodeURIComponent(expr));
             const data = await res.json();
 
             steps = data.steps;
@@ -193,13 +192,8 @@ def index():
 </html>
     """)
 
-
-@balancing_symbol.route('/check')
+@balancing_symbol_bp.route('/check')
 def check():
     expr = request.args.get("expr", "")
     balanced, steps = is_balanced(expr)
     return jsonify({"result": balanced, "steps": steps})
-
-
-if __name__ == '__main__':
-    balancing_symbol.run(debug=True)

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structure Visualizer Control Panel</title>
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Data Structure Visualizer</h1>
+        <p>Interactive visualization and algorithm demonstrations</p>
+    </div>
+
+    <!-- ================= TREE ================= -->
+    <div class="section">
+        <h2>Tree</h2>
+        <div class="grid">
+            <a href="/rotation" class="card card-rotation">
+                <span class="card-icon">🔄</span>
+                <h2>Tree Rotation Practice</h2>
+                <p>Master tree rotations with interactive demonstrations. Practice left, right, left-right, and
+                    right-left rotations with visual feedback.</p>
+            </a>
+
+            <a href="/traversal" class="card card-traversal">
+                <span class="card-icon">🔍</span>
+                <h2>Tree Traversal Methods</h2>
+                <p>Explore all tree traversal techniques: inorder, preorder, postorder, BFS, and DFS. See the visiting
+                    order with detailed explanations.</p>
+            </a>
+            <a href="/avl" class="card card-avl">
+                <span class="card-icon">🌲</span>
+                <h2>AVL Tree</h2>
+                <p>An AVL Tree is a type of self-balancing binary search tree (BST) where the height difference (balance
+                    factor) between the left and right subtrees of any node is at most 1. This ensures that operations
+                    like insertion, deletion, and search remain efficient — all with O(log n) time complexity.</p>
+            </a>
+
+            <a href="/btree" class="card card-btree">
+                <span class="card-icon">🅱️</span>
+                <h2>BTree</h2>
+                <p>A B-Tree is a self-balancing search tree that stores multiple keys in each node and keeps data sorted
+                    for fast access, insertion, and deletion. It’s optimized for systems that read and write large data
+                    blocks, such as databases and file systems. All leaf nodes are at the same level, ensuring balance,
+                    and the tree grows or shrinks using node splits and merges. This structure keeps the height low,
+                    allowing efficient disk-based searching in O(log n) time.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- ================= BST ================= -->
+    <div class="section">
+        <h2>BST</h2>
+        <div class="grid">
+            <a href="/bst" class="card card-bst">
+                <span class="card-icon">🌲</span>
+                <h2>Binary Search Tree</h2>
+                <p>Classic BST implementation with insertion and deletion operations. Step-by-step explanations of node
+                    placement and restructuring.</p>
+            </a>
+        </div>
+    </div>
+    <!-- ================= STACK ================= -->
+    <div class="section">
+        <h2>Stack</h2>
+        <div class="grid">
+            <a href="/stack_array" class="card card-stack_array">
+                <span class="card-icon">📚</span>
+                <h2>Stack Array Visualizer</h2>
+                <p>Visualize stack operations (push, pop, peek) in an array representation with real-time
+                    animations.</p>
+            </a>
+            <a href="/balancing_symbol" class="card card-balancing-symbol">
+                <span class="card-icon">⚖️</span>
+                <h2>Balancing Symbols</h2>
+                <p>Check for balanced parentheses and symbols using stack-based processing.</p>
+            </a>
+            <a href="/infix_to_postfix" class="card card-infix-to-postfix">
+                <span class="card-icon">⚙️</span>
+                <h2>Infix to Postfix</h2>
+                <p>Convert a standard arithmetic expression (infix, with operators between operands) into postfix
+                    (Reverse Polish Notation) using a stack to manage operator precedence and parentheses.</p>
+            </a>
+            <a href="/postfix_evaluation" class="card card-postfix-evaluation">
+                <span class="card-icon">👨‍🏫</span>
+                <h2>Postfix evaluation</h2>
+                <p>Evaluate a postfix expression by scanning tokens left→right and using a stack of values: push
+                    operands, and when an operator appears, pop the required operands, apply the operator, then push the
+                    result.</p>
+            </a>
+            <a href="/stack_linked_list" class="card card-stack-linked-list">
+                <span class="card-icon">🔗</span>
+                <h2>Stack using Linked List</h2>
+                <p>A stack backed by a linked list stores elements in nodes and uses the list head as the top of the
+                    stack. Push creates a new node and links it at the head; pop removes the head node.</p>
+            </a>
+            <a href="/tower_of_hanoi" class="card card-tower-of-hanoi">
+                <span class="card-icon">🗼</span>
+                <h2>Tower of Hanoi</h2>
+                <p>A classic recursive puzzle: move n disks from source peg to target peg using an auxiliary peg, never
+                    placing a larger disk on a smaller one.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- ================= GRAPH ================= -->
+    <div class="section">
+        <h2>Graph</h2>
+        <div class="grid">
+            <a href="/spanning" class="card card-spanning">
+                <span class="card-icon">🕸️</span>
+                <h2>Spanning Tree Generator</h2>
+                <p>Visualize Minimum Spanning Trees using Kruskal's and Prim's algorithms.</p>
+            </a>
+
+            <a href="/dijkstra" class="card card-dijkstra">
+                <span class="card-icon">🚦</span>
+                <h2>Dijkstra’s Shortest Path</h2>
+                <p>Visualize Dijkstra’s algorithm step-by-step with animations and highlights.</p>
+            </a>
+
+            <a href="/prims" class="card card-prims">
+                <span class="card-icon">🕸️</span>
+                <h2>Prim’s Minimum Spanning Tree</h2>
+                <p>Visualize Prim’s algorithm as it grows the minimum spanning tree step-by-step from a starting
+                    node.</p>
+            </a>
+
+            <a href="/kruskal" class="card card-kruskal">
+                <span class="card-icon">🌉</span>
+                <h2>Kruskal’s Minimum Spanning Tree</h2>
+                <p>Watch Kruskal’s algorithm build the minimum spanning tree by sorting edges and connecting components
+                    visually.</p>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- ================= LINKED LIST ================= -->
+    <div class="section">
+        <h2>Linked List</h2>
+        <div class="grid">
+            <a href="/singly_linkedlist" class="card card-singly-linkedlist">
+                <span class="card-icon">➡️</span>
+                <h2>Singly Linked List</h2>
+                <p>Visualize how nodes connect in one direction and perform insertions, deletions, and traversals
+                    step-by-step.</p>
+            </a>
+
+            <a href="/doubly_linkedlist" class="card card-doubly-linkedlist">
+                <span class="card-icon">↔️</span>
+                <h2>Doubly Linked List</h2>
+                <p>Explore bidirectional node connections with operations like insert, delete, and reverse
+                    traversal.</p>
+            </a>
+
+            <a href="/singly_circular_linkedlist" class="card card-singly-circular-linkedlist">
+                <span class="card-icon">🔁</span>
+                <h2>Singly Circular Linked List</h2>
+                <p>See how the last node loops back to the first, forming a circle for continuous traversal and
+                    efficient rotations.</p>
+            </a>
+
+            <a href="/doubly_circular_linkedlist" class="card card-doubly-circular-linkedlist">
+                <span class="card-icon">🔄</span>
+                <h2>Doubly Circular Linked List</h2>
+                <p>Understand circular bidirectional links enabling traversal in both directions without null
+                    terminations.</p>
+            </a>
+
+            <a href="/sparse_matrix" class="card card-sparse-matrix">
+                <span class="card-icon">🧮</span>
+                <h2>Sparse Matrix</h2>
+                <p>Learn how sparse matrices efficiently store and visualize data with mostly zero elements using linked
+                    representations.</p>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- ================= QUEUE ================= -->
+    <div class="section">
+        <h2>Queue</h2>
+        <div class="grid">
+            <a href="/queue" class="card card-queue-array">
+                <span class="card-icon">🚥</span>
+                <h2>Queue using Array</h2>
+                <p>Visualize enqueue and dequeue operations dynamically in queue data structure.</p>
+            </a>
+            <a href="/queue_linked_list" class="card card-queue-linked-list">
+                <span class="card-icon">🖇️</span>
+                <h2>Queue using Linked List</h2>
+                <p>Visualize enqueue and dequeue operations dynamically in queue data structure.</p>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- ================= DYNAMIC MEMORY ALLOCATION ================= -->
+    <div class="section">
+        <h2>Dynamic Memory Allocation</h2>
+        <div class="grid">
+            <a href="/memory" class="card card-memory">
+                <span class="card-icon">💾</span>
+                <h2>Memory Allocation Visualizer</h2>
+                <p>Understand memory allocation techniques (malloc, calloc, realloc, free) visually with step-by-step
+                    representation.</p>
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

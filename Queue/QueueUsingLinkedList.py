@@ -1,100 +1,84 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Blueprint, request, jsonify, render_template_string
 
-app = Flask(__name__)
+# Define the Blueprint
+queue_linked_list_bp = Blueprint('queue_linked_list_bp', __name__, url_prefix='/queue_linked_list')
 
 # ------------------------------
-# Queue Data Structure
+# Data Structure: Queue using Array
 # ------------------------------
-
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.addr = hex(id(self))  # simulated memory address
-        self.next = None
 
 class Queue:
-    def __init__(self):
-        self.front = None
-        self.rear = None
+    def __init__(self, size=7):
+        self.queue = []
+        self.max_size = size
 
-    def enqueue(self, data):
-        """Add an element to the rear of the queue"""
-        new_node = Node(data)
-        if self.rear is None:
-            self.front = self.rear = new_node
-            return f"Enqueued {data} as the first node (addr: {new_node.addr})"
-        self.rear.next = new_node
-        self.rear = new_node
-        return f"Enqueued {data} at rear (addr: {new_node.addr})"
+    def enqueue(self, value):
+        if len(self.queue) >= self.max_size:
+            return "Queue Overflow! Cannot enqueue more elements."
+        self.queue.append(value)
+        return f"Enqueued value {value} to the queue."
 
     def dequeue(self):
-        """Remove an element from the front of the queue"""
-        if self.front is None:
-            return "Queue Underflow — No element to dequeue."
-        removed_node = self.front
-        self.front = self.front.next
-        if self.front is None:
-            self.rear = None
-        return f"Dequeued {removed_node.data} (addr: {removed_node.addr})"
+        if not self.queue:
+            return "Queue Underflow! Queue is empty."
+        value = self.queue.pop(0)
+        return f"Dequeued value {value} from the queue."
 
     def to_list(self):
-        """Return all queue elements as list of dicts"""
         result = []
-        curr = self.front
-        while curr:
+        for i, value in enumerate(self.queue):
             result.append({
-                "data": curr.data,
-                "addr": curr.addr,
-                "next": curr.next.addr if curr.next else None
+                "index": i,
+                "value": value,
+                "addr": hex(id(value))
             })
-            curr = curr.next
         return result
 
 
-# Create global queue instance
-queue = Queue()
+# Global instance
+queue = Queue(size=7)
 
 # ------------------------------
-# Flask Routes
+# Routes
 # ------------------------------
 
-@app.route('/')
+@queue_linked_list_bp.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Queue Visualization</title>
+        <title>Queue Visualization (Array Implementation)</title>
         <style>
             body { font-family: Arial; text-align: center; background: #f8fafc; margin-top: 50px; }
             canvas { border: 2px solid #333; background: white; margin-top: 20px; }
             input, button { padding: 8px; margin: 5px; font-size: 16px; }
+            #status { font-size: 16px; color: #222; margin-top: 10px; }
         </style>
     </head>
     <body>
-        <h2>📦 Queue Visualization (Enqueue & Dequeue with Front and Rear)</h2>
-
+        <h2>🚉 Queue Visualization (Array-Based Implementation)</h2>
         <div>
-            <input type="text" id="value" placeholder="Enter value">
-            <button onclick="enqueue()">Enqueue</button>
-            <button onclick="dequeue()">Dequeue</button>
+            <input type="text" id="queueValue" placeholder="Enter value">
+            <button onclick="enqueueValue()">Enqueue</button>
+            <button onclick="dequeueValue()">Dequeue</button>
         </div>
 
         <p id="status"></p>
-        <canvas id="canvas" width="1200" height="500"></canvas>
+        <canvas id="canvas" width="1000" height="400"></canvas>
 
         <script>
-            async function enqueue() {
-                let val = document.getElementById("value").value;
-                if (!val) return alert("Enter a value to enqueue");
-                let res = await fetch('/enqueue?value=' + val);
+            async function enqueueValue() {
+                let val = document.getElementById("queueValue").value;
+                if (!val) return alert("Enter a value to enqueue.");
+                let res = await fetch('/queue_linked_list/enqueue?value=' + val);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawQueue(data.queue);
             }
 
-            async function dequeue() {
-                let res = await fetch('/dequeue');
+            async function dequeueValue() {
+                let res = await fetch('/queue_linked_list/dequeue');
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawQueue(data.queue);
@@ -105,86 +89,69 @@ def index():
                 let ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                if (queue.length === 0) {
-                    ctx.font = "20px Arial";
-                    ctx.fillText("Queue is empty", 500, 250);
-                    return;
-                }
-
-                let x = 150, y = 200;
+                let x = 80, y = 150;
                 let boxWidth = 150, boxHeight = 80;
 
-                ctx.font = "14px Arial";
+                if (queue.length === 0) {
+                    ctx.font = "20px Arial";
+                    ctx.fillText("Queue is empty", 400, 200);
+                    return;
+                }
 
                 for (let i = 0; i < queue.length; i++) {
                     let node = queue[i];
 
-                    // Draw node box
-                    ctx.strokeStyle = "#000";
+                    // Draw box
+                    ctx.strokeStyle = "#333";
                     ctx.lineWidth = 2;
                     ctx.strokeRect(x, y, boxWidth, boxHeight);
 
-                    // Draw data and address
-                    ctx.fillText("Data: " + node.data, x + 15, y + 30);
-                    ctx.fillText("Addr: " + node.addr, x + 15, y + 55);
+                    // Data and Address
+                    ctx.font = "14px Arial";
+                    ctx.fillText("Value: " + node.value, x + 10, y + 30);
+                    ctx.fillText("Addr: " + node.addr, x + 10, y + 55);
 
-                    // Draw arrow to next node
+                    // Draw arrows between boxes
                     if (i < queue.length - 1) {
                         ctx.beginPath();
                         ctx.moveTo(x + boxWidth, y + boxHeight / 2);
                         ctx.lineTo(x + boxWidth + 30, y + boxHeight / 2);
                         ctx.stroke();
-
-                        // Arrowhead
                         ctx.beginPath();
                         ctx.moveTo(x + boxWidth + 30, y + boxHeight / 2);
                         ctx.lineTo(x + boxWidth + 20, y + boxHeight / 2 - 5);
+                        ctx.moveTo(x + boxWidth + 30, y + boxHeight / 2);
                         ctx.lineTo(x + boxWidth + 20, y + boxHeight / 2 + 5);
-                        ctx.fill();
+                        ctx.stroke();
+                    }
+
+                    // Front and Rear labels
+                    if (i === 0) {
+                        ctx.fillStyle = "red";
+                        ctx.fillText("Front", x + 40, y - 10);
+                        ctx.fillStyle = "black";
+                    }
+                    if (i === queue.length - 1) {
+                        ctx.fillStyle = "blue";
+                        ctx.fillText("Rear", x + 50, y + boxHeight + 20);
+                        ctx.fillStyle = "black";
                     }
 
                     x += boxWidth + 40;
                 }
-
-                // Draw Front and Rear labels
-                ctx.fillStyle = "red";
-                ctx.font = "16px Arial";
-                ctx.fillText("Front →", 100, y + boxHeight / 2 + 5);
-                ctx.fillText("Rear →", x - boxWidth - 10, y + boxHeight / 2 + 5);
             }
-
-            // Load initial queue state
-            window.onload = async function() {
-                let res = await fetch('/status');
-                let data = await res.json();
-                drawQueue(data.queue);
-            };
         </script>
     </body>
     </html>
     """)
 
-
-@app.route('/enqueue')
+@queue_linked_list_bp.route('/enqueue')
 def enqueue_value():
     value = request.args.get('value')
-    msg = queue.enqueue(value) if value else "No value provided."
+    msg = queue.enqueue(value) if value else "No value provided for enqueue."
     return jsonify({"message": msg, "queue": queue.to_list()})
 
-
-@app.route('/dequeue')
+@queue_linked_list_bp.route('/dequeue')
 def dequeue_value():
     msg = queue.dequeue()
     return jsonify({"message": msg, "queue": queue.to_list()})
-
-
-@avl_.route('/status')
-def get_status():
-    return jsonify({"queue": queue.to_list()})
-
-
-# ------------------------------
-# Run Server
-# ------------------------------
-if __name__ == '__main__':
-    app.run(debug=True)

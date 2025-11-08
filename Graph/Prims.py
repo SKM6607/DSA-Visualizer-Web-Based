@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, render_template_string
-import json, math
+from flask import Blueprint, request, jsonify, render_template_string
+import math
 
-app = Flask(__name__)
+# Create Blueprint
+prims_bp = Blueprint('prims', __name__, url_prefix='/prims')
 
 # -------------------------------
 # Prim's Algorithm Implementation
@@ -39,15 +40,15 @@ def prim_mst(graph):
 
 
 # -------------------------------
-# Flask Routes
+# Routes
 # -------------------------------
-@app.route('/')
+@prims_bp.route('/')
 def index():
     default_matrix = """0,2,0,6,0
 2,0,3,8,5
 0,3,0,0,7
 6,8,0,0,9
-0,5,7,9,0"""  # Default graph
+0,5,7,9,0"""
 
     return render_template_string(f"""
     <!DOCTYPE html>
@@ -78,7 +79,7 @@ def index():
                 if (!matrixInput) return alert("Please enter adjacency matrix!");
 
                 const rows = matrixInput.split("\\n").map(r => r.split(',').map(Number));
-                const res = await fetch('/prims', {{
+                const res = await fetch('/prims/calculate', {{
                     method: 'POST',
                     headers: {{ 'Content-Type': 'application/json' }},
                     body: JSON.stringify({{ graph: rows }})
@@ -117,7 +118,6 @@ def index():
                             ctx.moveTo(nodes[i].x, nodes[i].y);
                             ctx.lineTo(nodes[j].x, nodes[j].y);
                             ctx.stroke();
-                            // Weight label
                             const midX = (nodes[i].x + nodes[j].x) / 2;
                             const midY = (nodes[i].y + nodes[j].y) / 2;
                             ctx.fillStyle = "gray";
@@ -146,7 +146,6 @@ def index():
                             ctx.fill();
                         }});
 
-                        // Redraw node labels
                         ctx.fillStyle = 'black';
                         ctx.font = '16px Arial';
                         for (let i = 0; i < n; i++) {{
@@ -180,13 +179,9 @@ def index():
     </html>
     """)
 
-@app.route('/prims', methods=['POST'])
+@prims_bp.route('/calculate', methods=['POST'])
 def run_prims():
     data = request.get_json()
     graph = data['graph']
     edges, steps, total_cost = prim_mst(graph)
     return jsonify({"edges": edges, "steps": steps, "total_cost": total_cost})
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

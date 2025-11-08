@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Blueprint, request, jsonify, render_template_string
 
-app = Flask(__name__)
+app = Blueprint('infixToPostfix',__name__,url_prefix='/infix_to_postfix')
 
 # ------------------------------
 # Infix to Postfix Conversion Logic

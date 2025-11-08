@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Blueprint, request, jsonify, render_template_string
 
-app = Flask(__name__)
+queue_bp = Blueprint('queue_bp', __name__, url_prefix='/queue')
 
 # ------------------------------
 # Data Structure: Queue using Array
@@ -24,7 +24,6 @@ class Queue:
         return f"Dequeued value {value} from the queue."
 
     def to_list(self):
-        """Return structured data with index and address"""
         result = []
         for i, value in enumerate(self.queue):
             result.append({
@@ -38,10 +37,10 @@ class Queue:
 queue = Queue(size=7)
 
 # ------------------------------
-# Flask Routes
+# Blueprint Routes
 # ------------------------------
 
-@app.route('/')
+@queue_bp.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
@@ -70,14 +69,14 @@ def index():
             async function enqueueValue() {
                 let val = document.getElementById("queueValue").value;
                 if (!val) return alert("Enter a value to enqueue.");
-                let res = await fetch('/enqueue?value=' + val);
+                let res = await fetch('/queue/enqueue?value=' + val);
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawQueue(data.queue);
             }
 
             async function dequeueValue() {
-                let res = await fetch('/dequeue');
+                let res = await fetch('/queue/dequeue');
                 let data = await res.json();
                 document.getElementById("status").innerText = data.message;
                 drawQueue(data.queue);
@@ -100,22 +99,20 @@ def index():
                 for (let i = 0; i < queue.length; i++) {
                     let node = queue[i];
 
-                    // Draw box
                     ctx.strokeStyle = "#333";
                     ctx.lineWidth = 2;
                     ctx.strokeRect(x, y, boxWidth, boxHeight);
 
-                    // Data and Address
                     ctx.font = "14px Arial";
                     ctx.fillText("Value: " + node.value, x + 10, y + 30);
                     ctx.fillText("Addr: " + node.addr, x + 10, y + 55);
 
-                    // Draw arrows between boxes
                     if (i < queue.length - 1) {
                         ctx.beginPath();
                         ctx.moveTo(x + boxWidth, y + boxHeight / 2);
                         ctx.lineTo(x + boxWidth + 30, y + boxHeight / 2);
                         ctx.stroke();
+
                         ctx.beginPath();
                         ctx.moveTo(x + boxWidth + 30, y + boxHeight / 2);
                         ctx.lineTo(x + boxWidth + 20, y + boxHeight / 2 - 5);
@@ -124,7 +121,6 @@ def index():
                         ctx.stroke();
                     }
 
-                    // Front and Rear labels
                     if (i === 0) {
                         ctx.fillStyle = "red";
                         ctx.fillText("Front", x + 40, y - 10);
@@ -144,23 +140,13 @@ def index():
     </html>
     """)
 
-@app.route('/enqueue')
+@queue_bp.route('/enqueue')
 def enqueue_value():
     value = request.args.get('value')
-    if value:
-        msg = queue.enqueue(value)
-    else:
-        msg = "No value provided for enqueue."
+    msg = queue.enqueue(value) if value else "No value provided for enqueue."
     return jsonify({"message": msg, "queue": queue.to_list()})
 
-@app.route('/dequeue')
+@queue_bp.route('/dequeue')
 def dequeue_value():
     msg = queue.dequeue()
     return jsonify({"message": msg, "queue": queue.to_list()})
-
-# ------------------------------
-# Run Flask App
-# ------------------------------
-
-if __name__ == '__main__':
-    app.run(debug=True)

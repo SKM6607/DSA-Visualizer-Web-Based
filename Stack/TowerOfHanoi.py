@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template_string, request, Blueprint
 
-app = Flask(__name__)
+app = Blueprint('towerOfHanoi',__name__,url_prefix='tower_of_hanoi')
 
 # ---- Tower of Hanoi Logic ----
 moves = []

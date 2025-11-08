@@ -1,8 +1,7 @@
-from flask import Flask, render_template_string, request, jsonify
+from flask import Blueprint, render_template_string, request, jsonify
 
-app = Flask(__name__)
+kruskal_bp = Blueprint('kruskal', __name__, url_prefix='/kruskal')
 
-# HTML Template with visualization and input form
 html_template = """
 <!DOCTYPE html>
 <html>
@@ -30,7 +29,6 @@ html_template = """
         const canvas = document.getElementById("graphCanvas");
         const ctx = canvas.getContext("2d");
 
-        let nodes = {};
         let positions = {};
         const radius = 20;
 
@@ -66,7 +64,7 @@ html_template = """
 
         async function startKruskal() {
             const input = document.getElementById("edgesInput").value.trim();
-            const response = await fetch("/kruskal", {
+            const response = await fetch("/kruskal/run", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({edges: input})
@@ -83,7 +81,6 @@ html_template = """
             const angleStep = (2 * Math.PI) / nodesList.length;
             const centerX = 400, centerY = 250, radiusCircle = 180;
 
-            // Assign node positions in circular layout
             positions = {};
             nodesList.forEach((node, i) => {
                 const angle = i * angleStep;
@@ -91,12 +88,10 @@ html_template = """
                                    centerY + radiusCircle * Math.sin(angle)];
             });
 
-            // Draw initial graph
             clearCanvas();
             edges.forEach(e => drawEdge(e[0], e[1], e[2]));
             nodesList.forEach(n => drawNode(n));
 
-            // Step-by-step MST formation
             for (let s of steps) {
                 await new Promise(r => setTimeout(r, 1000));
                 clearCanvas();
@@ -121,9 +116,9 @@ html_template = """
 
 # ---- Kruskal Algorithm ----
 def find(parent, i):
-    if parent[i] == i:
-        return i
-    return find(parent, parent[i])
+    if parent[i] != i:
+        parent[i] = find(parent, parent[i])
+    return parent[i]
 
 def union(parent, rank, x, y):
     xroot = find(parent, x)
@@ -136,11 +131,11 @@ def union(parent, rank, x, y):
         parent[yroot] = xroot
         rank[xroot] += 1
 
-@app.route("/")
+@kruskal_bp.route("/")
 def home():
     return render_template_string(html_template)
 
-@app.route("/kruskal", methods=["POST"])
+@kruskal_bp.route("/run", methods=["POST"])
 def kruskal():
     data = request.get_json()
     raw_edges = data["edges"]
@@ -148,18 +143,18 @@ def kruskal():
     nodes = set()
 
     for part in raw_edges.split(","):
-        u, v, w = part.strip().split()
+        parts = part.strip().split()
+        if len(parts) != 3:
+            continue  # skip invalid or blank lines
+        u, v, w = parts
         w = int(w)
         edges.append((u, v, w))
         nodes.add(u)
         nodes.add(v)
 
     edges = sorted(edges, key=lambda e: e[2])
-    parent = {}
-    rank = {}
-    for node in nodes:
-        parent[node] = node
-        rank[node] = 0
+    parent = {node: node for node in nodes}
+    rank = {node: 0 for node in nodes}
 
     mst = []
     steps = []
@@ -176,6 +171,3 @@ def kruskal():
         "edges": edges,
         "steps": steps
     })
-
-if __name__ == "__main__":
-    app.run(debug=True)

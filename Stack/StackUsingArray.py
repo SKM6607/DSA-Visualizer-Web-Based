@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template_string
 
 #avl_bp = Blueprint('avl', __name__, url_prefix='/avl'
-stack_array = Blueprint('stack_array', __name__, url_prefix='/stack_array')
+stack_array = Blueprint('stackArr', __name__, url_prefix='/stack_array')
 
 # ------------------------------
 # Data Structure: Stack using Array

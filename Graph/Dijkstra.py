@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template_string, request, jsonify
 
 # ✅ Correct blueprint name (should not start with '/')
-dijkstra_ = Blueprint("dijkstra", __name__)
+dijkstra_bp = Blueprint("dijkstra", __name__,url_prefix="/dijkstra")
 
 # --- HTML and Visualization Template ---
 html_template = """
@@ -129,11 +129,11 @@ html_template = """
 """
 
 # --- Dijkstra Algorithm Backend ---
-@dijkstra_.route("/")
+@dijkstra_bp.route("/")
 def home():
     return render_template_string(html_template)
 
-@dijkstra_.route("/run", methods=["POST"])
+@dijkstra_bp.route("/run", methods=["POST"])
 def run_dijkstra():
     data = request.get_json()
     raw_edges = data.get("edges", "")
